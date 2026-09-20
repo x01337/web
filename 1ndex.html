@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Architecture - Копаниця Станіслав</title>
+    <meta name="description" content="Глибокий аналіз хмарних технологій: IaaS, PaaS, SaaS, архітектурні патерни, безпека та DevOps інженерія.">
+    <meta name="keywords" content="хмарні технології, IaaS, PaaS, SaaS, AWS, Azure, DevOps, архітектура, безпека">
+    <meta name="author" content="Kopanitsia Stanislav">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* Змінні для ТЕМНОЇ теми */
+        :root {
+            --bg: #07070F; 
+            --bg-s: #0B0B17; 
+            --bg-c: #10101C; 
+            --border: rgba(255,255,255,.08); 
+            --border-h: rgba(99,102,241,.3);
+            --a: #6366F1; 
+            --a-d: rgba(99,102,241,.10); 
+            --a2: #A78BFA; 
+            --tp: #EEEEFF; 
+            --ts: #8A8AA3; 
+            --tm: #32324A;
+            --glow-1: rgba(99,102,241,0.08);
+            --glow-2: rgba(167,139,250,0.05);
+            --nav-bg: rgba(11, 11, 23, 0.7);
+            
+            --fd: 'Syne', sans-serif; 
+            --fb: 'DM Sans', sans-serif; 
+            --fm: 'DM Mono', monospace;
+            --e: cubic-bezier(.25,.1,.25,1);
+        }
+
+        /* Змінні для м'якої СВІТЛОЇ теми (Soft / Eye-care) */
+        [data-theme="light"] {
+            --bg: #F4F3EE; 
+            --bg-s: #EBEAE4; 
+            --bg-c: #FCFBFA; 
+            --border: rgba(0,0,0,0.06); 
+            --border-h: rgba(99,102,241,.3);
+            --a: #5C5FC8; 
+            --a-d: rgba(99,102,241,.08); 
+            --a2: #8966D6; 
+            --tp: #2C2C35; 
+            --ts: #5C5C66; 
+            --tm: #8F8F99;
+            --glow-1: rgba(99,102,241,0.08);
+            --glow-2: rgba(167,139,250,0.08);
+            --nav-bg: rgba(244, 243, 238, 0.8);
+        }
+
+        html.sw *, html.sw *::before, html.sw *::after {
+            transition: background-color 0.4s var(--e), color 0.4s var(--e), border-color 0.4s var(--e), box-shadow 0.4s var(--e) !important;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; font-size: 16px; }
+        body {
+            font-family: var(--fb); 
+            background: var(--bg); 
+            color: var(--ts); 
+            line-height: 1.7; 
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1;
+            background: 
+                radial-gradient(circle at 15% 50%, var(--glow-1) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, var(--glow-2) 0%, transparent 50%);
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+        
+        .nav {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 80px); max-width: 1120px; z-index: 100;
+            background: var(--nav-bg); backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: 100px;
+            padding: 12px 30px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        }
+        .nav-logo { font-family: var(--fd); font-size: 16px; font-weight: 800; color: var(--tp); }
+        .nav-logo em { color: var(--a); font-style: normal; }
+        
+        .nav-actions { display: flex; gap: 20px; align-items: center; }
+        .nav-link { font-family: var(--fm); font-size: 12px; color: var(--tp); text-transform: uppercase; text-decoration: none; letter-spacing: 1px; transition: color 0.2s; }
+        .nav-link:hover { color: var(--a); }
+
+        .theme-btn {
+            background: transparent; border: 1px solid var(--border); color: var(--ts);
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.3s var(--e);
+        }
+        .theme-btn:hover { border-color: var(--border-h); color: var(--a); transform: rotate(20deg); }
+        .theme-btn svg { width: 15px; height: 15px; pointer-events: none; }
+        .icon-sun { display: none; } .icon-moon { display: block; }
+        [data-theme="light"] .icon-sun { display: block; }
+        [data-theme="light"] .icon-moon { display: none; }
+
+        .hero { padding: 180px 0 100px; text-align: center; border-bottom: 1px solid var(--border); }
+        h1 { font-family: var(--fd); font-size: clamp(40px, 6vw, 72px); color: var(--tp); line-height: 1.1; margin-bottom: 24px; letter-spacing: -0.04em; }
+        h1 span { background: linear-gradient(135deg, var(--a), var(--a2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        h2 { font-family: var(--fd); font-size: 32px; color: var(--tp); margin: 60px 0 24px; letter-spacing: -0.02em; }
+        p { margin-bottom: 24px; font-size: 17px; font-weight: 300; }
+        strong { color: var(--tp); font-weight: 500; }
+        mark { background: var(--a-d); color: var(--a2); padding: 2px 8px; border-radius: 4px; }
+
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin: 40px 0; }
+        .card {
+            background: var(--bg-c); border: 1px solid var(--border); border-radius: 24px;
+            padding: 32px; transition: transform 0.3s var(--e), border-color 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.01);
+        }
+        .card:hover { transform: translateY(-5px); border-color: var(--border-h); box-shadow: 0 10px 30px rgba(0,0,0,0.03); }
+        .card h3 { font-family: var(--fm); font-size: 14px; color: var(--a); margin-bottom: 16px; letter-spacing: 1px; }
+        
+        .content-row {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            margin: 50px 0;
+        }
+        .content-row.reverse {
+            flex-direction: row-reverse;
+        }
+        .content-row .text-side {
+            flex: 1;
+        }
+        .content-row .image-side {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+        }
+
+        .img-container { 
+            border-radius: 20px; 
+            overflow: hidden; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            max-width: 100%;
+        }
+        .img-container img { display: block; object-fit: cover; transition: transform 0.6s var(--e); width: 100%; height: auto; }
+        .img-container:hover img { transform: scale(1.03); }
+
+        .ext-link { color: var(--a2); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.2s; }
+        .ext-link:hover { border-bottom-color: var(--a2); }
+
+        @media (max-width: 900px) {
+            .content-row, .content-row.reverse {
+                flex-direction: column;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="nav">
+        <div class="nav-logo">виконав Копаниця Станіслав<em>.</em></div>
+        <div class="nav-actions">
+            <a href="#deep-dive" class="nav-link">Архітектура ↓</a>
+            <button class="theme-btn" onclick="toggleTheme()" aria-label="Змінити тему">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <h1>Еволюція <span>Хмарних</span> Обчислень</h1>
+            <p style="max-width: 700px; margin: 0 auto;">Від базового хостингу до глобальних розподілених систем, мікросервісів та Serverless-архітектури. Сучасний підхід до розробки та розгортання ПЗ.</p>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <h2>Фундамент технології</h2>
+        
+        <!-- Блок 1: текст + фото -->
+        <div class="content-row">
+            <div class="text-side">
+                <p>
+                    <mark>Хмарні технології</mark> є парадигмою розподілених обчислень, яка 
+                    забезпечує повсюдний та оперативний мережевий доступ до спільного пулу 
+                    конфігурованих ресурсів. <u>Завдяки моделям обслуговування</u>, 
+                    таким як <span style="font-size: 1.3em;">IaaS, PaaS та SaaS</span>, користувачі отримують 
+                    обчислювальні потужності, сховища даних і програмне забезпечення як 
+                    послугу без необхідності <strong>керувати</strong> <u>фізичною інфраструктурою</u>.
+                </p>
+                <p>
+                    Сучасна хмарна архітектура дозволяє абстрагуватися від "заліза". Інженери більше не налаштовують фізичні маршрутизатори чи дискові масиви — вся інфраструктура описується кодом.
+                </p>
+            </div>
+            <div class="image-side">
+                <a href="https://aws.amazon.com/" target="_blank" style="width: 100%; max-width: 400px;">
+                    <div class="img-container">
+                        <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80" alt="Cloud Network Concept">
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <h2 id="deep-dive">Моделі обслуговування (Cloud Service Models)</h2>
+        <div class="grid-3">
+            <div class="card">
+                <h3>01 // IaaS (Infrastructure)</h3>
+                <p>Надання базових обчислювальних ресурсів: віртуальних машин, мереж, сховищ. Клієнт повністю контролює ОС та встановлене ПЗ (наприклад, AWS EC2).</p>
+            </div>
+            <div class="card">
+                <h3>02 // PaaS (Platform)</h3>
+                <p>Платформа для розробки та розгортання додатків. Провайдер керує ОС, базами даних та середовищем виконання (наприклад, Heroku, AWS Elastic Beanstalk).</p>
+            </div>
+            <div class="card">
+                <h3>03 // SaaS (Software)</h3>
+                <p>Готове програмне забезпечення, доступне через браузер або API. Клієнт лише користується функціоналом (наприклад, Google Workspace, GitHub).</p>
+            </div>
+        </div>
+
+        <h2>Архітектурні переваги та безпека</h2>
+        
+        <!-- Блок 2: текст + фото (реверс) -->
+        <div class="content-row reverse">
+            <div class="text-side">
+                <p>
+                    Основними архітектурними перевагами цієї концепції є еластичність масштабування (Auto Scaling) та модель оплати 
+                    за фактичне споживання (Pay-as-you-go). Крім того, централізація даних у 
+                    хмарі підвищує ефективність спільної роботи та забезпечує високий рівень 
+                    відмовостійкості завдяки <em>географічному резервуванню</em> у різних Availability Zones.
+                </p>
+                <p>
+                    Безпека у хмарі будується за принципом спільної відповідальності (Shared Responsibility Model). Провайдер захищає інфраструктуру, а клієнт відповідає за шифрування даних.
+                </p>
+            </div>
+            <div class="image-side">
+                <div class="img-container" style="width: 100%; max-width: 450px;">
+                    <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1000&q=80" alt="Server Hardware">
+                </div>
+            </div>
+        </div>
+
+        <h2>Вплив на цифрову економіку</h2>
+        
+        <!-- Блок 3: текст + фото -->
+        <div class="content-row">
+            <div class="text-side">
+                <p>
+                    <em><small>У сучасній цифровій економіці</small></em> ці технології 
+                    виступають <strong>фундаментальним</strong> базисом для розгортання систем 
+                    штучного інтелекту, <span style="font-size: 1.3em;">аналітики великих даних</span> та 
+                    автоматизації бізнес-процесів (CI/CD).
+                </p>
+                <p>
+                    Хмари створюють нові робочі місця, оптимізують операційні витрати компаній та стимулюють розвиток стартапів по всьому світу.
+                </p>
+            </div>
+            <div class="image-side">
+                <div class="img-container" style="width: 100%; max-width: 450px;">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1600&q=80" alt="Global Data Distribution">
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 60px;">Додаткові ресурси</h2>
+        <ul style="list-style-type: none; padding-bottom: 100px;">
+            <li style="margin-bottom: 12px;">→ <a href="https://aws.amazon.com/architecture/" target="_blank" class="ext-link">AWS Architecture Center</a></li>
+            <li style="margin-bottom: 12px;">→ <a href="https://cloud.google.com/architecture" target="_blank" class="ext-link">Google Cloud Architecture Framework</a></li>
+            <li style="margin-bottom: 12px;">→ <a href="https://learn.microsoft.com/en-us/azure/architecture/" target="_blank" class="ext-link">Azure Architecture Center</a></li>
+        </ul>
+
+    </main>
+
+    <!-- Скрипт для перемикання тем -->
+    <script>
+        let theme = localStorage.getItem('sk-lab-theme') || 'dark';
+        
+        function setTheme(t) {
+            document.documentElement.classList.add('sw');
+            document.documentElement.setAttribute('data-theme', t);
+            theme = t;
+            localStorage.setItem('sk-lab-theme', t);
+            setTimeout(() => document.documentElement.classList.remove('sw'), 400);
+        }
+        
+        function toggleTheme() { 
+            setTheme(theme === 'dark' ? 'light' : 'dark'); 
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => setTheme(theme));
+    </script>
+</body>
+</html>
